@@ -17,7 +17,9 @@
 // Load composer
 require __DIR__ . '/config.php';
 require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/classes.php';
+foreach (glob('classes/*') as $filename) {
+    include_once $filename;
+}
 
 $commands_path = __DIR__ . '/commands';
 
