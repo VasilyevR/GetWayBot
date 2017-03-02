@@ -5,14 +5,12 @@
  * Date: 01.03.17
  * Time: 13:58
  */
-//namespace Longman\TelegramBot;
 
 use Longman\TelegramBot\DB;
 use Longman\TelegramBot\ConversationDB;
 use Longman\TelegramBot\Entities;
 use Longman\TelegramBot\Entities\Update;
 use Longman\TelegramBot\Entities\Message;
-use Longman\TelegramBot\Exception;
 
 class BotDB extends DB{
     /**
