@@ -1,0 +1,21 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: vasilyevr
+ * Date: 28.02.17
+ * Time: 17:11
+ */
+class config {
+    public static $API_KEY    = '';
+    public static $BOTAN_KEY  = '';
+    public static $GOOGLE_KEY = '';
+    public static $BOT_NAME   = '';
+    public static $mysql      = [
+        'host'     => 'localhost',
+        'user'     => 'user',
+        'password' => 'pass',
+        'database' => 'base',
+    ];
+    public static $admins     = ['id'];
+}
+?>
