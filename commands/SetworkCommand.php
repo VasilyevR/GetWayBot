@@ -28,7 +28,7 @@ class SetworkCommand extends UserCommand
     {
         $message = $this->getMessage();
         $chat_id = $message->getChat()->getId();
-        $text = 'We have a problems...';
+        $text    = 'We have a problems...';
 
         if ($message->getLocation()) {
             if (\BotDB::updateUser($message->getFrom()->getId(), $message)) {

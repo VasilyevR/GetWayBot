@@ -33,7 +33,6 @@ class BotDB extends DB
             $sth->execute();
 
             $result = $sth->fetchColumn();
-
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -92,12 +91,7 @@ class BotDB extends DB
             $sql .= 'WHERE `id` = :id';
             $sth1 = self::$pdo->prepare($sql);
             $sth1->bindParam(':id', $user_id, \PDO::PARAM_INT);
-
-            if ($location) {
-                $sth1->bindParam(":$type_location", $location, \PDO::PARAM_STR, 255);
-            } else {
-                $sth1->bindParam(":$type_location", $location, \PDO::PARAM_NULL);
-            }
+            $sth1->bindParam(":$type_location", $location, \PDO::PARAM_STR, 255);
 
             $status = $sth1->execute();
         } catch (PDOException $e) {
@@ -122,11 +116,17 @@ class BotDB extends DB
             return false;
         }
 
-        $type         = $message->getType();
-        $last_command = self::selectLastCommand($user_id);
-        $command      = false;
-        $location     = '';
-        $locationTxt  = null;
+        $type          = $message->getType();
+        $last_command  = self::selectLastCommand($user_id);
+        $command       = false;
+        $location      = '';
+        $locationTxt   = null;
+        $locationTypes = [
+            'sethome' => 'home_location',
+            'setwork' => 'work_location',
+            'way' => 'from_location',
+        ];
+
         if ($type === 'command') {
             $command = $message->getCommand();
         } elseif (in_array($type, ['Location','Venue'])) {
@@ -134,17 +134,12 @@ class BotDB extends DB
             $locationTxt = $location->getLatitude() . ',' . $location->getLongitude();
         }
 
-        $status = false;
         if ($command) {
             $status = self::updateLastCommand($user_id, $command);
-        } elseif ($location && in_array($last_command, array('sethome', 'setwork'))) {
-            if ($last_command == 'sethome') {
-                $status = self::updateLocationUser($user_id, 'home_location', $locationTxt);
-            } elseif ($last_command == 'setwork') {
-                $status = self::updateLocationUser($user_id, 'work_location', $locationTxt);
-            }
-        } elseif (in_array($last_command, array('way'))) {
-            $status = self::updateLocationUser($user_id, 'from_location', $locationTxt);
+        } elseif ($location && in_array($last_command, array_keys($locationTypes))) {
+            $status = self::updateLocationUser($user_id, $locationTypes[$last_command], $locationTxt);
+        } else {
+            $status = false;
         }
 
         return $status;
