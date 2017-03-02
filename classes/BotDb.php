@@ -41,6 +41,73 @@ class BotDB extends DB
         return $result;
     }
     /**
+     * Update last command
+     *
+     * @param  integer $user_id
+     * @param  string $command
+     *
+     * @return bool If the command was saved
+     * @throws TelegramException
+     */
+    public static function updateLastCommand($user_id, $command)
+    {
+        if (!self::isDbConnected()) {
+            return false;
+        }
+
+        try {
+            $sql  = 'UPDATE `' . TB_USER . '` SET ';
+            $sql .= '`last_command` = :last_command ';
+            $sql .= 'WHERE `id` = :id';
+            $sth1 = self::$pdo->prepare($sql);
+            $sth1->bindParam(':id', $user_id, \PDO::PARAM_INT);
+            $sth1->bindParam(':last_command', $command, \PDO::PARAM_STR, 255);
+            $status = $sth1->execute();
+        } catch (PDOException $e) {
+            throw new TelegramException($e->getMessage());
+        }
+
+        return $status;
+
+    }
+    /**
+     * Update user location
+     *
+     * @param  integer $user_id
+     * @param  string $type_location
+     * @param  string $location
+     *
+     * @return bool If the location was saved
+     * @throws TelegramException
+     */
+    public static function updateLocationUser($user_id, $type_location, $location)
+    {
+        if (!self::isDbConnected()) {
+            return false;
+        }
+
+        try {
+            $sql  = 'UPDATE `' . TB_USER . '` SET ';
+            $sql .= "`$type_location` = :$type_location ";
+            $sql .= 'WHERE `id` = :id';
+            $sth1 = self::$pdo->prepare($sql);
+            $sth1->bindParam(':id', $user_id, \PDO::PARAM_INT);
+
+            if ($location) {
+                $sth1->bindParam(":$type_location", $location, \PDO::PARAM_STR, 255);
+            } else {
+                $sth1->bindParam(":$type_location", $location, \PDO::PARAM_NULL);
+            }
+
+            $status = $sth1->execute();
+        } catch (PDOException $e) {
+            throw new TelegramException($e->getMessage());
+        }
+
+        return $status;
+
+    }
+    /**
      * Update users settings
      *
      * @param  integer $user_id
@@ -54,6 +121,7 @@ class BotDB extends DB
         if (!self::isDbConnected()) {
             return false;
         }
+
         $type         = $message->getType();
         $last_command = self::selectLastCommand($user_id);
         $command      = false;
@@ -61,50 +129,24 @@ class BotDB extends DB
         $locationTxt  = null;
         if ($type === 'command') {
             $command = $message->getCommand();
-        } elseif (in_array($type, [
-            'Location',
-            'Venue',
-        ])) {
+        } elseif (in_array($type, ['Location','Venue'])) {
             $location    = $message->getLocation();
-            $locationTxt = $location->getLatitude().','.$location->getLongitude();
+            $locationTxt = $location->getLatitude() . ',' . $location->getLongitude();
         }
-        try {
-            $sql = 'UPDATE `' . TB_USER . '` SET ';
-            if ($command) {
-                $sql .= '`last_command` = :last_command ';
-            } elseif ($location && in_array($last_command, array('sethome', 'setwork'))) {
-                if ($last_command == 'sethome') {
-                    $sql .= '`home_location` = :home_location ';
-                } elseif ($last_command == 'setwork') {
-                    $sql .= '`work_location` = :work_location ';
-                }
-            } elseif (in_array($last_command, array('way'))) {
-                $sql .= '`from_location` = :from_location ';
+
+        $status = false;
+        if ($command) {
+            $status = self::updateLastCommand($user_id, $command);
+        } elseif ($location && in_array($last_command, array('sethome', 'setwork'))) {
+            if ($last_command == 'sethome') {
+                $status = self::updateLocationUser($user_id, 'home_location', $locationTxt);
+            } elseif ($last_command == 'setwork') {
+                $status = self::updateLocationUser($user_id, 'work_location', $locationTxt);
             }
-            $sql .= 'WHERE `id` = :id';
-            $sth1 = self::$pdo->prepare($sql);
-            $sth1->bindParam(':id', $user_id, \PDO::PARAM_INT);
-            if ($command) {
-                $sth1->bindParam(':last_command', $command, \PDO::PARAM_STR, 255);
-            } elseif ($location && in_array($last_command, array('sethome', 'setwork', 'way'))) {
-                if ($last_command == 'sethome') {
-                    $sth1->bindParam(':home_location', $locationTxt, \PDO::PARAM_STR, 255);
-                } elseif ($last_command == 'setwork') {
-                    $sth1->bindParam(':work_location', $locationTxt, \PDO::PARAM_STR, 255);
-                } elseif ($last_command == 'way') {
-                    if ($location) {
-                        $sth1->bindParam(':from_location', $locationTxt, \PDO::PARAM_STR, 255);
-                    } else {
-                        $sth1->bindParam(':from_location', $locationTxt, \PDO::PARAM_NULL);
-                    }
-                }
-            } else {
-                return false;
-            }
-            $status = $sth1->execute();
-        } catch (PDOException $e) {
-            throw new TelegramException($e->getMessage());
+        } elseif (in_array($last_command, array('way'))) {
+            $status = self::updateLocationUser($user_id, 'from_location', $locationTxt);
         }
+
         return $status;
     }
     /**
