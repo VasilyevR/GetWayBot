@@ -9,7 +9,6 @@ namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Request;
-use Longman\TelegramBot\Entities\ReplyKeyboardHide;
 use config;
 
 class HomeCommand extends UserCommand
@@ -44,7 +43,6 @@ class HomeCommand extends UserCommand
             );
             $data   = [
                 'text' => $text,
-                'reply_markup' => new ReplyKeyboardHide(['selective' => false])
             ];
         } elseif($destination == '') {
             $data = [

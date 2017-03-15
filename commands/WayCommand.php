@@ -9,7 +9,6 @@ namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Request;
-use Longman\TelegramBot\Entities\ReplyKeyboardHide;
 use config;
 
 class WayCommand extends UserCommand
@@ -47,7 +46,6 @@ class WayCommand extends UserCommand
 
             $data = [
                 'text' => $text,
-                'reply_markup' => new ReplyKeyboardHide(['selective' => false])
             ];
 
             \BotDB::deleteFromLocation($message->getFrom()->getId());

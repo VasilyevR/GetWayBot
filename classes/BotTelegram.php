@@ -70,8 +70,8 @@ class BotTelegram extends Longman\TelegramBot\Telegram{
             ])) {
                 $command = $this->getCommandFromType($type);
             } elseif (in_array($type, [
-                'Location',
-                'Venue',
+                'location',
+                'venue',
             ])) {
                 $user_id      = $message->getFrom()->getId();
                 $last_command = BotDB::selectLastCommand($user_id);

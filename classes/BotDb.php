@@ -129,7 +129,7 @@ class BotDB extends DB
 
         if ($type === 'command') {
             $command = $message->getCommand();
-        } elseif (in_array($type, ['Location','Venue'])) {
+        } elseif (in_array($type, ['location','venue'])) {
             $location    = $message->getLocation();
             $locationTxt = $location->getLatitude() . ',' . $location->getLongitude();
         }
