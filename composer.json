@@ -1,6 +1,8 @@
 {
-    "name": "vasilyevr/GetWayBot",
+    "description": "Telegram bot for getting map directions",
+    "name": "vasilyevr/get-way-bot",
     "type": "project",
+    "license": "GPL-3.0",
     "require": {
         "php": ">=5.5.0",
         "longman/telegram-bot": "dev-master"
