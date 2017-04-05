@@ -5,7 +5,7 @@
     "license": "GPL-3.0",
     "require": {
         "php": ">=5.5.0",
-        "longman/telegram-bot": "dev-master"
+        "longman/telegram-bot": ">=0.41.0"
     }
 }
 
